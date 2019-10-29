@@ -1,0 +1,815 @@
+/*Ejercicio 99*/
+
+ drop table if exists empleados;
+
+ create table empleados(
+  documento char(8),
+  nombre varchar(20),
+  apellido varchar(20),
+  sueldo decimal(6,2),
+  cantidadhijos int,
+  seccion varchar(20),
+  primary key(documento)
+ );
+
+ insert into empleados values('22222222','Juan','Perez',300,2,'Contaduria');
+ insert into empleados values('22333333','Luis','Lopez',300,0,'Contaduria');
+ insert into empleados values ('22444444','Marta','Perez',500,1,'Sistemas');
+ insert into empleados values('22555555','Susana','Garcia',400,2,'Secretaria');
+ insert into empleados values('22666666','Jose Maria','Morales',400,3,'Secretaria');
+
+ drop procedure if exists pa_empleados_sueldo;
+ 
+ delimiter //
+ create procedure pa_empleados_sueldo()
+  begin
+    select nombre,apellido,sueldo
+      from empleados;
+  end //
+  delimiter ;
+
+ call pa_empleados_sueldo();
+
+ drop procedure if exists pa_empleados_hijos;
+ 
+ delimiter //
+ create procedure pa_empleados_hijos()
+ begin
+   select nombre,apellido,cantidadhijos
+     from empleados
+   where cantidadhijos>0;
+ end //
+ delimiter ;
+
+ call pa_empleados_hijos();
+
+ update empleados set cantidadhijos=1 where documento='22333333';
+ call pa_empleados_hijos();
+
+
+
+
+/*Ejercicio 100*/
+
+ drop table if exists empleados;
+
+ create table empleados(
+  documento char(8),
+  nombre varchar(20),
+  apellido varchar(20),
+  sueldo decimal(6,2),
+  cantidadhijos int,
+  seccion varchar(20),
+  primary key(documento)
+ );
+
+
+ insert into empleados values('22222222','Juan','Perez',300,2,'Contaduria');
+ insert into empleados values('22333333','Luis','Lopez',300,0,'Contaduria');
+ insert into empleados values ('22444444','Marta','Perez',500,1,'Sistemas');
+ insert into empleados values('22555555','Susana','Garcia',400,2,'Secretaria');
+ insert into empleados values('22666666','Jose Maria','Morales',400,3,'Secretaria');
+
+ drop procedure if exists pa_empleados_sueldo;
+
+ delimiter //
+ create procedure pa_empleados_sueldo(
+   in p_sueldo decimal(6,2))
+ begin
+   select nombre,apellido,sueldo
+     from empleados
+     where sueldo>=p_sueldo;
+ end //
+ delimiter ;
+
+ call pa_empleados_sueldo(400);
+ call pa_empleados_sueldo(500);
+
+ call pa_empleados_sueldo();
+
+ drop procedure pa_empleados_actualizar_sueldo;
+
+ delimiter //
+ create procedure pa_empleados_actualizar_sueldo
+   (p_sueldoanterior decimal(6,2),
+    p_sueldonuevo decimal(6,2))
+ begin
+   update empleados set sueldo=p_sueldonuevo
+     where sueldo=p_sueldoanterior;
+ end //
+ delimiter ;
+
+ call pa_empleados_actualizar_sueldo(300, 350);
+ select * from empleados;
+
+ call pa_empleados_actualizar_sueldo(300);
+
+
+
+ 
+ /*Ejercicio 101*/
+
+
+ drop table if exists empleados;
+
+ create table empleados(
+  documento char(8),
+  nombre varchar(20),
+  apellido varchar(20),
+  sueldo decimal(6,2),
+  cantidadhijos int,
+  seccion varchar(20),
+  primary key(documento)
+ );
+
+ insert into empleados values('22222222','Juan','Perez',300,2,'Contaduria');
+ insert into empleados values('22333333','Luis','Lopez',700,0,'Contaduria');
+ insert into empleados values ('22444444','Marta','Perez',500,1,'Sistemas');
+ insert into empleados values('22555555','Susana','Garcia',400,2,'Secretaria');
+ insert into empleados values('22666666','Jose Maria','Morales',1200,3,'Secretaria');
+
+ drop procedure if exists pa_seccion;
+
+ delimiter //
+ create procedure pa_seccion(
+   in p_seccion varchar(20),
+   out promedio float,
+   out mayor float)
+ begin
+   select avg(sueldo) into promedio
+     from empleados
+     where seccion=p_seccion;
+   select max(sueldo) into mayor
+   from empleados
+    where seccion=p_seccion; 
+  end //  
+ delimiter ;   
+
+ call pa_seccion('Contaduria', @p, @m);
+ select @p,@m;
+ 
+ call pa_seccion('Secretaria', @p, @m);
+ select @p,@m; 
+
+
+
+
+/*Ejercicio 102*/
+
+ 
+ drop table if exists empleados;
+
+ create table empleados(
+  documento char(8),
+  nombre varchar(20),
+  apellido varchar(20),
+  sueldo decimal(6,2),
+  cantidadhijos int,
+  seccion varchar(20),
+  primary key(documento)
+ );
+
+
+ insert into empleados values('22222222','Juan','Perez',300,2,'Contaduria');
+ insert into empleados values('22333333','Luis','Lopez',700,0,'Contaduria');
+ insert into empleados values ('22444444','Marta','Perez',500,1,'Sistemas');
+ insert into empleados values('22555555','Susana','Garcia',400,2,'Secretaria');
+ insert into empleados values('22666666','Jose Maria','Morales',1200,3,'Secretaria');
+
+
+ drop procedure if exists pa_cantidad_hijos;
+ 
+ delimiter //
+ create procedure pa_cantidad_hijos(
+   in p_documento char(8),
+   inout cantidad int)
+ begin
+   select cantidadhijos+cantidad into cantidad 
+     from empleados
+     where documento=p_documento;
+ end //
+ delimiter ;
+ 
+ 
+ set @cant=0;
+ 
+ call pa_cantidad_hijos('22222222',@cant); 
+ select @cant; -- muestra un 2
+ 
+ call pa_cantidad_hijos('22666666',@cant);
+ select @cant; -- muestra un 5
+
+
+
+
+/*Ejercicio 103*/
+
+ drop table if exists clientes;
+ drop table if exists provincias;
+
+ create table clientes (
+  codigo int unsigned auto_increment,
+  nombre varchar(30) not null,
+  domicilio varchar(30),
+  ciudad varchar(20),
+  codigoprovincia tinyint unsigned,
+  telefono varchar(11),
+  primary key(codigo)
+ );
+
+ create table provincias(
+  codigo tinyint unsigned auto_increment,
+  nombre varchar(20),
+  primary key (codigo)
+ );
+
+ insert into provincias (nombre) values('Cordoba');
+ insert into provincias (nombre) values('Santa Fe');
+ insert into provincias (nombre) values('Corrientes');
+ insert into provincias (nombre) values('Misiones');
+ insert into provincias (nombre) values('Salta');
+ insert into provincias (nombre) values('Buenos Aires');
+ insert into provincias (nombre) values('Neuquen');
+
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Marcos', 'Colon 111', 'Córdoba',1,'null');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Ana', 'San Martin 222', 'Cruz del Eje',1,'4578585');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Garcia Juan', 'Rivadavia 333', 'Villa Maria',1,'4578445');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Luis', 'Sarmiento 444', 'Rosario',2,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Pereyra Lucas', 'San Martin 555', 'Cruz del Eje',1,'4253685');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Gomez Ines', 'San Martin 666', 'Santa Fe',2,'0345252525');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Torres Fabiola', 'Alem 777', 'Villa del Rosario',1,'4554455');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Carlos', 'Irigoyen 888', 'Cruz del Eje',1,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Ramos Betina', 'San Martin 999', 'Cordoba',1,'4223366');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Lucas', 'San Martin 1010', 'Posadas',4,'0457858745');
+
+
+ drop procedure if exists pa_cantidad_clientes_provincias;
+
+ delimiter //
+  create procedure pa_cantidad_clientes_provincias(
+    in provincia1 varchar(20),
+    in provincia2 varchar(20))
+  begin
+    declare canti1 int;
+    declare canti2 int;
+    select count(*) into canti1 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia1;
+    select count(*) into canti2 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia2;     
+    select canti1,canti2;  
+  end //
+  delimiter ;
+
+
+ declare canti1, canti2 int;
+
+ call pa_cantidad_clientes_provincias('Cordoba','Santa Fe'); 
+
+
+
+
+/*Ejercicio 104*/
+
+ drop table if exists clientes;
+ drop table if exists provincias;
+
+ create table clientes (
+  codigo int unsigned auto_increment,
+  nombre varchar(30) not null,
+  domicilio varchar(30),
+  ciudad varchar(20),
+  codigoprovincia tinyint unsigned,
+  telefono varchar(11),
+  primary key(codigo)
+ );
+
+ create table provincias(
+  codigo tinyint unsigned auto_increment,
+  nombre varchar(20),
+  primary key (codigo)
+ );
+
+ insert into provincias (nombre) values('Cordoba');
+ insert into provincias (nombre) values('Santa Fe');
+ insert into provincias (nombre) values('Corrientes');
+ insert into provincias (nombre) values('Misiones');
+ insert into provincias (nombre) values('Salta');
+ insert into provincias (nombre) values('Buenos Aires');
+ insert into provincias (nombre) values('Neuquen');
+
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Marcos', 'Colon 111', 'Córdoba',1,'null');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Ana', 'San Martin 222', 'Cruz del Eje',1,'4578585');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Garcia Juan', 'Rivadavia 333', 'Villa Maria',1,'4578445');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Luis', 'Sarmiento 444', 'Rosario',2,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Pereyra Lucas', 'San Martin 555', 'Cruz del Eje',1,'4253685');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Gomez Ines', 'San Martin 666', 'Santa Fe',2,'0345252525');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Torres Fabiola', 'Alem 777', 'Villa del Rosario',1,'4554455');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Carlos', 'Irigoyen 888', 'Cruz del Eje',1,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Ramos Betina', 'San Martin 999', 'Cordoba',1,'4223366');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Lucas', 'San Martin 1010', 'Posadas',4,'0457858745');
+
+ drop procedure if exists pa_mas_clientes_provincias;
+
+ delimiter //
+  create procedure pa_mas_clientes_provincias(
+    in provincia1 varchar(20),
+    in provincia2 varchar(20))
+  begin
+    declare canti1 int;
+    declare canti2 int;
+    select count(*) into canti1 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia1;
+    select count(*) into canti2 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia2;     
+    if canti1>canti2 then
+      select provincia1,canti1;
+    elseif canti2>canti1 then
+      select provincia2,canti2;
+    else
+      select provincia1,provincia2,canti1;
+    end if;  
+  end //
+  delimiter ; 
+
+ call pa_mas_clientes_provincias('Cordoba','Santa Fe');
+
+
+
+/*Ejercicio 105*/
+
+ drop table if exists clientes;
+ drop table if exists provincias;
+
+ create table clientes (
+  codigo int unsigned auto_increment,
+  nombre varchar(30) not null,
+  domicilio varchar(30),
+  ciudad varchar(20),
+  codigoprovincia tinyint unsigned,
+  telefono varchar(11),
+  primary key(codigo)
+ );
+
+ create table provincias(
+  codigo tinyint unsigned auto_increment,
+  nombre varchar(20),
+  primary key (codigo)
+ );
+
+
+ insert into provincias (nombre) values('Cordoba');
+ insert into provincias (nombre) values('Santa Fe');
+ insert into provincias (nombre) values('Corrientes');
+ insert into provincias (nombre) values('Misiones');
+ insert into provincias (nombre) values('Salta');
+ insert into provincias (nombre) values('Buenos Aires');
+ insert into provincias (nombre) values('Neuquen');
+
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Marcos', 'Colon 111', 'Córdoba',1,'null');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Ana', 'San Martin 222', 'Cruz del Eje',1,'4578585');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Garcia Juan', 'Rivadavia 333', 'Villa Maria',1,'4578445');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Perez Luis', 'Sarmiento 444', 'Rosario',2,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Pereyra Lucas', 'San Martin 555', 'Cruz del Eje',1,'4253685');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Gomez Ines', 'San Martin 666', 'Santa Fe',2,'0345252525');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Torres Fabiola', 'Alem 777', 'Villa del Rosario',1,'4554455');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Carlos', 'Irigoyen 888', 'Cruz del Eje',1,null);
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Ramos Betina', 'San Martin 999', 'Cordoba',1,'4223366');
+ insert into clientes (nombre,domicilio,ciudad,codigoProvincia,telefono)
+  values ('Lopez Lucas', 'San Martin 1010', 'Posadas',4,'0457858745');
+
+ drop procedure if exists pa_mas_clientes_provincias;
+
+ delimiter //
+  create procedure pa_mas_clientes_provincias(
+    in provincia1 varchar(20),
+    in provincia2 varchar(20))
+  begin
+    declare canti1 int;
+    declare canti2 int;
+    select count(*) into canti1 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia1;
+    select count(*) into canti2 from clientes as cli
+      join provincias as pro 
+      on pro.codigo=cli.codigoprovincia
+      where pro.nombre=provincia2;     
+    case  
+      when canti1>canti2 then
+        select provincia1,canti1;
+      when canti2>canti1 then
+        select provincia2,canti2;
+      else
+        select provincia1,provincia2,canti1;
+    end case;  
+  end //
+  delimiter ;
+
+ call pa_mas_clientes_provincias('Cordoba','Santa Fe');
+
+
+
+/*Ejercicio 106*/
+
+drop procedure if exists pa_generar_dos_aleatorios;
+
+delimiter //
+create procedure pa_generar_dos_aleatorios(
+  out valor1 int,
+  out valor2 int)
+begin
+  etiqueta1:loop
+    set valor1=rand()*10;
+    set valor2=rand()*10;
+    if valor1<>valor2 then
+      leave etiqueta1;
+    end if;
+  end loop;
+end //
+delimiter ;
+
+call pa_generar_dos_aleatorios(@v1,@v2);
+
+select @v1,@v2;
+
+
+
+/*Ejercicio 107*/
+
+drop procedure if exists pa_multiplicar;
+ 
+delimiter // 
+create procedure pa_multiplicar(
+  in numero1 int,
+  in numero2 int,
+  out producto int)
+begin
+  set producto=numero1*numero2;
+end // 
+delimiter ;
+
+call pa_multiplicar(20,3,@resu);
+
+select @resu;
+
+drop procedure if exists pa_multiplicar;
+ 
+delimiter // 
+create procedure pa_multiplicar(
+  in numero1 int,
+  in numero2 int,
+  out producto int)
+begin
+  set producto=numero1*numero2;
+end // 
+delimiter ;
+
+drop procedure if exists pa_factorial;
+
+delimiter // 
+create procedure pa_factorial(
+  in numero int,
+  out resultado int)
+begin  
+  declare num int;
+  set resultado=1;
+  set num=numero;
+  while num>1 do
+     call pa_multiplicar(resultado,num,resultado);
+     set num=num-1;
+  end while;
+end //    
+delimiter ;
+
+call pa_factorial(5, @resu);
+select @resu;
+
+
+
+
+/*Ejercicio 108*/
+
+SET @@session.max_sp_recursion_depth = 10; 
+
+drop procedure if exists pa_factorial;
+
+delimiter //
+create procedure pa_factorial(
+  in valor int,
+  out resu int)
+begin
+  if valor=0 then
+    set resu=1;
+  else
+    call pa_factorial(valor-1,resu);
+    set resu=valor*resu;
+  end if;
+end //  
+delimiter ;
+
+call pa_factorial(5,@resu);
+select @resu;
+
+call pa_factorial(valor-1,resu);
+
+SET @@session.max_sp_recursion_depth = 10; 
+
+SET @@GLOBAL.max_sp_recursion_depth = 5;
+
+
+
+/*Ejercicio 109*/
+
+drop table if exists sitios;
+
+create table sitios (
+    url varchar(100),
+    cantpaginas int,
+    estrellas tinyint,
+    primary key(url)
+);
+
+insert into sitios(url,cantpaginas,estrellas) values ('lanacion.com.ar',17000000,3);
+insert into sitios(url,cantpaginas,estrellas) values ('clarin.com',42000000,3);
+insert into sitios(url,cantpaginas,estrellas) values ('infobae.com',33000000,5);
+insert into sitios(url,cantpaginas,estrellas) values ('lavoz.com.ar',25000000,2);
+
+drop function if exists f_estrellas;
+
+delimiter //
+create function f_estrellas(
+  cant tinyint)
+  returns varchar(15)
+  deterministic
+ begin
+   declare estrellas varchar(15) default '';
+   declare x int default 0;
+   while x<cant do
+     set estrellas=concat(estrellas,'*');
+     set x=x+1;
+   end while;
+   return estrellas;
+ end //
+ delimiter ; 
+ 
+ select url,f_estrellas(estrellas) from sitios;
+
+ drop function if exists f_tipositio;
+ 
+ delimiter //
+ create function f_tipositio(
+   cantidad int)
+   returns varchar(20)
+   deterministic
+ begin
+case 
+    when cantidad<20000000 then
+      return 'tráfico bajo';
+    when cantidad>=20000000 and cantidad<40000000 then
+      return 'tráfico medio';
+    when cantidad>=40000000 then
+      return 'tráfico alto';
+  end case; 
+ end //
+ delimiter ;
+ 
+ select url,f_estrellas(estrellas), cantpaginas, f_tipositio(cantpaginas) from sitios; 
+
+drop function if exists f_mayor_trafico;
+ 
+ delimiter //
+ create function f_mayor_trafico()
+   returns varchar(100)
+   deterministic
+ begin
+   declare vurl varchar(100);
+   select url into vurl from sitios order by cantpaginas desc limit 1;
+   return vurl;
+ end //
+ delimiter ;
+ 
+ select f_mayor_trafico();
+
+
+
+
+/*Ejercicio 110*/
+
+drop table if exists usuarios;
+drop table if exists clavesanteriores;
+
+create table usuarios(
+ nombre varchar(30),
+ clave varchar(30),
+ primary key (nombre)
+);
+
+create table clavesanteriores(
+ numero int auto_increment,
+ nombre varchar(30),
+ clave varchar(30),
+ primary key (numero)
+);
+
+drop trigger if exists before_usuarios_update;
+
+delimiter //
+create trigger before_usuarios_update
+  before update
+  on usuarios
+  for each row
+begin
+  insert into clavesanteriores(nombre, clave) values (old.nombre, old.clave); 
+end //
+delimiter ;
+
+insert into usuarios(nombre,clave) values ('marcos','123abc');
+
+update usuarios set clave='999zzz' where nombre='marcos';
+
+
+select * from clavesanteriores;
+
+update usuarios set clave='123456' where nombre='marcos';
+
+select * from clavesanteriores;
+
+select * from usuarios;
+
+
+
+
+/*Ejercicio 111*/
+
+drop table if exists ventas;
+drop table if exists libros;
+
+ create table libros(
+  codigo int auto_increment,
+  titulo varchar(50),
+  autor varchar(50),
+  editorial varchar(30),
+  precio float, 
+  stock int,
+  primary key (codigo)
+ );
+
+ create table ventas(
+  numero int auto_increment,
+  codigolibro int,
+  precio float,
+  cantidad int,
+  primary key (numero)
+ );
+
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Uno','Richard Bach','Planeta',15,100);   
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Ilusiones','Richard Bach','Planeta',18,50);
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('El aleph','Borges','Emece',25,200);
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Aprenda PHP','Mario Molina','Emece',45,200);
+
+ drop trigger if exists before_ventas_insert;  
+
+ delimiter //
+ create trigger before_ventas_insert
+   before insert
+   on ventas
+   for each row
+ begin
+   update libros set stock=libros.stock-new.cantidad
+     where new.codigolibro=libros.codigo; 
+ end //
+ delimiter ;
+
+ insert into ventas(codigolibro, precio, cantidad)
+  values(1, 15, 1);
+
+ select * from libros;
+
+
+
+/*Ejercicio 112*/
+
+drop table if exists ventas;
+drop table if exists libros;
+
+ create table libros(
+  codigo int auto_increment,
+  titulo varchar(50),
+  autor varchar(50),
+  editorial varchar(30),
+  precio float, 
+  stock int,
+  primary key (codigo)
+ );
+
+ create table ventas(
+  numero int auto_increment,
+  codigolibro int,
+  precio float,
+  cantidad int,
+  primary key (numero)
+ );
+
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Uno','Richard Bach','Planeta',15,100);   
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Ilusiones','Richard Bach','Planeta',18,50);
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('El aleph','Borges','Emece',25,200);
+ insert into libros(titulo, autor, editorial, precio, stock)
+  values('Aprenda PHP','Mario Molina','Emece',45,200);
+
+ drop trigger if exists before_ventas_insert;  
+
+ delimiter //
+ create trigger before_ventas_insert
+   before insert
+   on ventas
+   for each row
+ begin
+   update libros set stock=libros.stock-new.cantidad
+     where new.codigolibro=libros.codigo; 
+ end //
+ delimiter ;
+
+ drop trigger if exists before_ventas_delete;  
+  
+ delimiter //
+ create trigger before_ventas_delete
+   before delete
+   on ventas
+   for each row
+ begin
+  update libros set stock=libros.stock+old.cantidad
+     where old.codigolibro=libros.codigo;   
+ end //
+ delimiter ;
+
+ insert into ventas(codigolibro, precio, cantidad) values(1, 15, 1);
+
+ select * from libros; 
+
+ delete from ventas where numero=1;
+ 
+ select * from libros;
+
+
+ 
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+ 
+
+
+
